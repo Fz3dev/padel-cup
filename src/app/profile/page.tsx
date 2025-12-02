@@ -19,11 +19,12 @@ export default function ProfilePage() {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
 
-            if (user) {
+            if (user?.email) {
+                // Look up team assignment by email and join with teams
                 const { data } = await supabase
-                    .from('profiles')
-                    .select('*, teams(*)')
-                    .eq('id', user.id)
+                    .from('team_assignments')
+                    .select('role, team_id, teams(*)')
+                    .eq('email', user.email)
                     .single();
                 setProfile(data);
             }

@@ -17,11 +17,12 @@ export default function Dashboard() {
     useEffect(() => {
         const getProfile = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
+            if (user?.email) {
+                // Look up team assignment by email
                 const { data } = await supabase
-                    .from('profiles')
+                    .from('team_assignments')
                     .select('team_id')
-                    .eq('id', user.id)
+                    .eq('email', user.email)
                     .single();
 
                 if (data?.team_id) {

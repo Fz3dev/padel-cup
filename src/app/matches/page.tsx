@@ -213,7 +213,7 @@ export default function MatchesPage() {
                                                     animate={{ opacity: 1, y: 0 }}
                                                     exit={{ opacity: 0, y: -10 }}
                                                     transition={{ duration: 0.15 }}
-                                                    className="absolute top-full mt-2 left-0 right-0 bg-stoneo-800 border border-white/10 rounded-lg overflow-hidden shadow-2xl z-50 max-h-64 overflow-y-auto"
+                                                    className="absolute top-full mt-2 left-0 right-0 bg-stoneo-800 border border-white/10 rounded-lg overflow-hidden shadow-2xl z-50 max-h-96 overflow-y-auto"
                                                 >
                                                     {teamFilter.length > 0 && (
                                                         <button
@@ -223,7 +223,7 @@ export default function MatchesPage() {
                                                             ✕ Tout désélectionner
                                                         </button>
                                                     )}
-                                                    {teams.map(team => (
+                                                    {teams.filter(team => !categoryFilter || team.category === categoryFilter).map(team => (
                                                         <button
                                                             key={team.id}
                                                             onClick={() => toggleTeam(team.id)}
