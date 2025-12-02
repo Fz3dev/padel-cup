@@ -24,13 +24,20 @@ export const WelcomeModal = () => {
             // Get team assignment
             const { data: assignment } = await supabase
                 .from('team_assignments')
-                .select('team_id, teams(name, members, category)')
+                .select('team_id, teams(name, category)')
                 .eq('email', user.email)
                 .single();
 
             if (assignment?.teams) {
-                const team = assignment.teams as any; // Type assertion for joined data
-                const partnerEmail = team.members.find((m: string) => m !== user.email);
+                // Get partner email from assignments
+                const { data: members } = await supabase
+                    .from('team_assignments')
+                    .select('email')
+                    .eq('team_id', assignment.team_id)
+                    .neq('email', user.email);
+
+                const partnerEmail = members?.[0]?.email;
+                const team = assignment.teams as any;
 
                 setData({
                     partner: partnerEmail || 'Inconnu',
