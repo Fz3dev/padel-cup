@@ -68,7 +68,9 @@ export default function MatchesPage() {
         if (statusFilter === 'finished') {
             filtered = filtered.filter(m => m.isFinished);
         } else if (statusFilter === 'pending') {
-            filtered = filtered.filter(m => !m.isFinished);
+            filtered = filtered.filter(m => !m.isFinished && !m.timerStartedAt);
+        } else if (statusFilter === 'ongoing') {
+            filtered = filtered.filter(m => !m.isFinished && m.timerStartedAt);
         }
 
         return filtered.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
@@ -157,7 +159,7 @@ export default function MatchesPage() {
                                     {/* Status Filter */}
                                     <div>
                                         <label className="text-[10px] text-white/50 uppercase tracking-wider block mb-2">Statut</label>
-                                        <div className="grid grid-cols-3 gap-2">
+                                        <div className="grid grid-cols-4 gap-2">
                                             <button
                                                 onClick={() => setStatusFilter(null)}
                                                 className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${!statusFilter
@@ -168,15 +170,6 @@ export default function MatchesPage() {
                                                 Tous
                                             </button>
                                             <button
-                                                onClick={() => setStatusFilter('finished')}
-                                                className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${statusFilter === 'finished'
-                                                    ? 'bg-padel-green text-stoneo-900'
-                                                    : 'bg-stoneo-900/50 text-white/50 border border-white/10 hover:border-padel-green/50'
-                                                    }`}
-                                            >
-                                                Terminés
-                                            </button>
-                                            <button
                                                 onClick={() => setStatusFilter('pending')}
                                                 className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${statusFilter === 'pending'
                                                     ? 'bg-padel-green text-stoneo-900'
@@ -184,6 +177,24 @@ export default function MatchesPage() {
                                                     }`}
                                             >
                                                 À jouer
+                                            </button>
+                                            <button
+                                                onClick={() => setStatusFilter('ongoing')}
+                                                className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${statusFilter === 'ongoing'
+                                                    ? 'bg-padel-green text-stoneo-900'
+                                                    : 'bg-stoneo-900/50 text-white/50 border border-white/10 hover:border-padel-green/50'
+                                                    }`}
+                                            >
+                                                En cours
+                                            </button>
+                                            <button
+                                                onClick={() => setStatusFilter('finished')}
+                                                className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${statusFilter === 'finished'
+                                                    ? 'bg-padel-green text-stoneo-900'
+                                                    : 'bg-stoneo-900/50 text-white/50 border border-white/10 hover:border-padel-green/50'
+                                                    }`}
+                                            >
+                                                Terminés
                                             </button>
                                         </div>
                                     </div>

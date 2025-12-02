@@ -176,7 +176,7 @@ export default function MatchDetailPage() {
                 {/* Timer - Only show if not finished */}
                 {!isEditing && (
                     <Card className="bg-stoneo-800/50 border-white/5">
-                        <MatchTimer match={match} canEdit={canEdit} />
+                        <MatchTimer durationMinutes={match.durationMinutes} />
                     </Card>
                 )}
 

@@ -80,10 +80,12 @@ export default function LeaderboardPage() {
             </div>
 
             <main className="px-4 space-y-3">
-                <div className="flex text-xs text-white/30 px-4 mb-1 font-mono uppercase tracking-wider">
+                <div className="flex text-[10px] text-white/30 px-4 mb-1 font-mono uppercase tracking-wider">
                     <div className="w-8">#</div>
                     <div className="flex-1">Équipe</div>
-                    <div className="w-10 text-center">V</div>
+                    <div className="w-8 text-center">MJ</div>
+                    <div className="w-8 text-center">V</div>
+                    <div className="w-8 text-center">D</div>
                     <div className="w-10 text-center">Diff</div>
                 </div>
 
@@ -105,11 +107,15 @@ export default function LeaderboardPage() {
 
                             <div className="flex-1 min-w-0">
                                 <div className="font-bold text-white truncate">{team.name}</div>
-                                <div className="text-xs text-white/50">Team {team.id} • {team.played} match{team.played > 1 ? 's' : ''}</div>
+                                <div className="text-[10px] text-white/50">Team {team.id}</div>
                             </div>
 
-                            <div className="w-10 text-center font-bold text-padel-yellow text-lg">{team.wins}</div>
-                            <div className="w-10 text-center font-mono text-white/70 text-sm">{team.diff > 0 ? '+' : ''}{team.diff}</div>
+                            <div className="w-8 text-center font-mono text-white/50 text-xs">{team.played}</div>
+                            <div className="w-8 text-center font-bold text-padel-green text-sm">{team.wins}</div>
+                            <div className="w-8 text-center font-mono text-red-400 text-xs">{team.played - team.wins}</div>
+                            <div className="w-10 text-center font-mono font-bold text-sm" style={{ color: team.diff > 0 ? '#DFFF00' : team.diff < 0 ? '#EF4444' : '#6B7280' }}>
+                                {team.diff > 0 ? '+' : ''}{team.diff}
+                            </div>
                         </Card>
                     </motion.div>
                 ))}

@@ -2,62 +2,15 @@
 import { useState, useEffect } from 'react';
 import { Button, cn, Badge } from '@/components/ui';
 import { Play, Pause, RotateCcw, Bell } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { Match } from '@/types';
-import toast from 'react-hot-toast';
 
 interface MatchTimerProps {
-    match: Match;
-    canEdit: boolean;
+    durationMinutes: number;
 }
 
-export const MatchTimer = ({ match, canEdit }: MatchTimerProps) => {
-    const [timeLeftMs, setTimeLeftMs] = useState(match.durationMinutes * 60 * 1000);
+export const MatchTimer = ({ durationMinutes }: MatchTimerProps) => {
+    const [timeLeft, setTimeLeft] = useState(durationMinutes * 60);
     const [isActive, setIsActive] = useState(false);
     const [hasFinished, setHasFinished] = useState(false);
-
-    // Calculate time left based on server state
-    useEffect(() => {
-        const calculateTime = () => {
-            if (!match.timerStartedAt) {
-                setTimeLeftMs(match.durationMinutes * 60 * 1000);
-                setIsActive(false);
-                setHasFinished(false);
-                return;
-            }
-
-            const now = new Date().getTime();
-            const start = new Date(match.timerStartedAt).getTime();
-            const totalPaused = match.timerTotalPausedMs || 0;
-
-            let elapsed = 0;
-
-            if (match.timerPausedAt) {
-                // Paused
-                const pausedAt = new Date(match.timerPausedAt).getTime();
-                elapsed = pausedAt - start - totalPaused;
-                setIsActive(false);
-            } else {
-                // Running
-                elapsed = now - start - totalPaused;
-                setIsActive(true);
-            }
-
-            const totalDuration = match.durationMinutes * 60 * 1000;
-            const remaining = Math.max(0, totalDuration - elapsed);
-
-            setTimeLeftMs(remaining);
-
-            if (remaining === 0 && !hasFinished) {
-                setHasFinished(true);
-                playAlarmSound();
-            }
-        };
-
-        calculateTime();
-        const interval = setInterval(calculateTime, 1000);
-        return () => clearInterval(interval);
-    }, [match, hasFinished]);
 
     // Play alarm sound using Web Audio API
     const playAlarmSound = () => {
@@ -109,58 +62,38 @@ export const MatchTimer = ({ match, canEdit }: MatchTimerProps) => {
         }
     };
 
-    const handleToggle = async () => {
-        if (!canEdit) return;
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (isActive && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft((prev) => {
+                    if (prev <= 1) {
+                        setIsActive(false);
+                        setHasFinished(true);
+                        playAlarmSound();
 
-        try {
-            if (!match.timerStartedAt) {
-                // Start
-                await supabase.from('matches').update({
-                    timer_started_at: new Date().toISOString(),
-                    timer_paused_at: null,
-                    timer_total_paused_ms: 0
-                }).eq('id', match.id);
-            } else if (isActive) {
-                // Pause
-                await supabase.from('matches').update({
-                    timer_paused_at: new Date().toISOString()
-                }).eq('id', match.id);
-            } else {
-                // Resume
-                const pausedAt = new Date(match.timerPausedAt!).getTime();
-                const now = new Date().getTime();
-                const additionalPause = now - pausedAt;
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate([200, 100, 200, 100, 200]);
+                        }
 
-                await supabase.from('matches').update({
-                    timer_paused_at: null,
-                    timer_total_paused_ms: (match.timerTotalPausedMs || 0) + additionalPause
-                }).eq('id', match.id);
-            }
-        } catch (error) {
-            toast.error("Erreur lors de la mise à jour du chrono");
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
         }
+        return () => clearInterval(interval);
+    }, [isActive, timeLeft]);
+
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    const progress = (timeLeft / (durationMinutes * 60)) * 100;
+
+    const handleReset = () => {
+        setIsActive(false);
+        setTimeLeft(durationMinutes * 60);
+        setHasFinished(false);
     };
-
-    const handleReset = async () => {
-        if (!canEdit) return;
-        if (!confirm("Voulez-vous vraiment réinitialiser le chronomètre ?")) return;
-
-        try {
-            await supabase.from('matches').update({
-                timer_started_at: null,
-                timer_paused_at: null,
-                timer_total_paused_ms: 0
-            }).eq('id', match.id);
-        } catch (error) {
-            toast.error("Erreur reset chrono");
-        }
-    };
-
-    const timeLeftSeconds = Math.ceil(timeLeftMs / 1000);
-    const minutes = Math.floor(timeLeftSeconds / 60);
-    const seconds = timeLeftSeconds % 60;
-    const totalDurationMs = match.durationMinutes * 60 * 1000;
-    const progress = (timeLeftMs / totalDurationMs) * 100;
 
     return (
         <div className="flex flex-col items-center justify-center py-6">
@@ -181,7 +114,7 @@ export const MatchTimer = ({ match, canEdit }: MatchTimerProps) => {
                     <circle
                         cx="50" cy="50" r="45"
                         fill="none"
-                        stroke={timeLeftSeconds === 0 ? "#39FF14" : "#DFFF00"}
+                        stroke={timeLeft === 0 ? "#39FF14" : "#DFFF00"}
                         strokeWidth="6"
                         strokeDasharray="283"
                         strokeDashoffset={283 - (283 * progress) / 100}
@@ -193,38 +126,36 @@ export const MatchTimer = ({ match, canEdit }: MatchTimerProps) => {
                 <div className="text-center z-10">
                     <div className={cn(
                         "text-6xl font-black font-outfit tabular-nums tracking-tighter transition-colors",
-                        timeLeftSeconds === 0 && "text-padel-green animate-pulse"
+                        timeLeft === 0 && "text-padel-green animate-pulse"
                     )}>
                         {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
                     </div>
                     <div className="text-sm text-white/50 mt-1 font-medium uppercase tracking-widest">
-                        {timeLeftSeconds === 0 ? "Terminé" : isActive ? "En cours" : "En pause"}
+                        {timeLeft === 0 ? "Terminé" : "Temps Restant"}
                     </div>
                 </div>
             </div>
 
-            {canEdit && (
-                <div className="flex gap-4 mt-6">
-                    <Button
-                        onClick={handleToggle}
-                        disabled={timeLeftSeconds === 0 && isActive}
-                        className={cn(
-                            "w-16 h-16 rounded-full p-0 flex items-center justify-center transition-all",
-                            isActive ? "bg-stoneo-700 text-white" : "bg-padel-yellow text-stoneo-900",
-                            timeLeftSeconds === 0 && "opacity-50 cursor-not-allowed"
-                        )}
-                    >
-                        {isActive ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        onClick={handleReset}
-                        className="w-16 h-16 rounded-full border border-white/10 hover:bg-red-500/20 hover:text-red-500 hover:border-red-500/50 transition-colors"
-                    >
-                        <RotateCcw size={24} />
-                    </Button>
-                </div>
-            )}
+            <div className="flex gap-4 mt-6">
+                <Button
+                    onClick={() => setIsActive(!isActive)}
+                    disabled={timeLeft === 0}
+                    className={cn(
+                        "w-16 h-16 rounded-full p-0 flex items-center justify-center",
+                        isActive ? "bg-stoneo-700 text-white" : "bg-padel-yellow text-stoneo-900",
+                        timeLeft === 0 && "opacity-50 cursor-not-allowed"
+                    )}
+                >
+                    {isActive ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
+                </Button>
+                <Button
+                    variant="ghost"
+                    onClick={handleReset}
+                    className="w-16 h-16 rounded-full border border-white/10"
+                >
+                    <RotateCcw size={24} />
+                </Button>
+            </div>
         </div>
     );
 };

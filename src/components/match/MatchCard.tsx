@@ -14,37 +14,7 @@ interface MatchCardProps {
 
 export const MatchCard = ({ match, team1, team2, showScore = true }: MatchCardProps) => {
     const isFinished = match.isFinished;
-
-    // Calculate remaining time
-    const getTimerStatus = () => {
-        if (!match.timerStartedAt) return null;
-
-        const now = new Date().getTime();
-        const start = new Date(match.timerStartedAt).getTime();
-        const totalPaused = match.timerTotalPausedMs || 0;
-
-        let elapsed = 0;
-        const isPaused = !!match.timerPausedAt;
-
-        if (isPaused) {
-            const pausedAt = new Date(match.timerPausedAt!).getTime();
-            elapsed = pausedAt - start - totalPaused;
-        } else {
-            elapsed = now - start - totalPaused;
-        }
-
-        const totalDuration = match.durationMinutes * 60 * 1000;
-        const remaining = Math.max(0, totalDuration - elapsed);
-        const remainingMinutes = Math.floor(remaining / 60000);
-        const remainingSeconds = Math.floor((remaining % 60000) / 1000);
-
-        return {
-            isPaused,
-            timeString: `${String(remainingMinutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
-        };
-    };
-
-    const timerStatus = getTimerStatus();
+    const isOngoing = !isFinished && match.timerStartedAt;
 
     return (
         <Link href={`/match/${match.id}`}>
@@ -59,18 +29,10 @@ export const MatchCard = ({ match, team1, team2, showScore = true }: MatchCardPr
                                 ✓ Terminé
                             </Badge>
                         )}
-                        {!isFinished && timerStatus && (
-                            <>
-                                <Badge className={cn(
-                                    "text-[10px] px-2 py-0.5",
-                                    timerStatus.isPaused ? "bg-yellow-600 text-white" : "bg-orange-500 text-white animate-pulse"
-                                )}>
-                                    {timerStatus.isPaused ? '⏸️ En pause' : '🔴 En cours'}
-                                </Badge>
-                                <Badge className="bg-stoneo-700 text-white/90 text-[10px] px-2 py-0.5">
-                                    ⏳ {timerStatus.timeString}
-                                </Badge>
-                            </>
+                        {isOngoing && (
+                            <Badge className="bg-orange-500 text-white text-[10px] px-2 py-0.5 animate-pulse">
+                                🔴 En cours
+                            </Badge>
                         )}
                     </div>
                     <div className="text-right">
