@@ -19,6 +19,9 @@ export interface Match {
     scoreTeam1: number | null;
     scoreTeam2: number | null;
     isFinished: boolean;
+    timerStartedAt?: string | null;
+    timerPausedAt?: string | null;
+    timerTotalPausedMs?: number;
 }
 
 export interface User {

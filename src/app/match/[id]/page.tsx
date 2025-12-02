@@ -19,9 +19,43 @@ export default function MatchDetailPage() {
     const [score2, setScore2] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const [canEdit, setCanEdit] = useState(false);
+    const [checkingPermissions, setCheckingPermissions] = useState(true);
+
     const match = matches.find(m => m.id === params.id);
     const team1 = match ? teams.find(t => t.id === match.team1Id) : null;
     const team2 = match ? teams.find(t => t.id === match.team2Id) : null;
+
+    // Check permissions
+    useEffect(() => {
+        const checkPermissions = async () => {
+            if (!match) return;
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user?.email) {
+                setCheckingPermissions(false);
+                return;
+            }
+
+            const { data: assignment } = await supabase
+                .from('team_assignments')
+                .select('team_id, role')
+                .eq('email', user.email)
+                .single();
+
+            if (assignment) {
+                const isAdmin = assignment.role === 'admin';
+                const isPlayerOfMatch = assignment.team_id === match.team1Id || assignment.team_id === match.team2Id;
+
+                if (isAdmin || isPlayerOfMatch) {
+                    setCanEdit(true);
+                }
+            }
+            setCheckingPermissions(false);
+        };
+
+        checkPermissions();
+    }, [match]);
 
     // Pre-fill scores if match is already finished
     useEffect(() => {
@@ -31,7 +65,7 @@ export default function MatchDetailPage() {
         }
     }, [match]);
 
-    if (loading) {
+    if (loading || checkingPermissions) {
         return <div className="min-h-screen bg-stoneo-900 flex items-center justify-center text-white">Chargement...</div>;
     }
 
@@ -40,6 +74,11 @@ export default function MatchDetailPage() {
     }
 
     const handleSubmit = async () => {
+        if (!canEdit) {
+            toast.error("Vous n'avez pas la permission de modifier ce match");
+            return;
+        }
+
         if (!score1 || !score2) {
             toast.error("Veuillez entrer les deux scores");
             return;
@@ -113,6 +152,13 @@ export default function MatchDetailPage() {
                         </Badge>
                     </div>
                 )}
+                {!isEditing && match.timerStartedAt && (
+                    <div className="flex justify-center">
+                        <Badge className="bg-orange-500 text-white text-sm px-4 py-1.5 font-bold animate-pulse">
+                            🔴 Match En Cours
+                        </Badge>
+                    </div>
+                )}
 
                 {/* Header VS */}
                 <div className="flex justify-between items-center text-center">
@@ -130,7 +176,7 @@ export default function MatchDetailPage() {
                 {/* Timer - Only show if not finished */}
                 {!isEditing && (
                     <Card className="bg-stoneo-800/50 border-white/5">
-                        <MatchTimer durationMinutes={match.durationMinutes} />
+                        <MatchTimer match={match} canEdit={canEdit} />
                     </Card>
                 )}
 
@@ -144,16 +190,29 @@ export default function MatchDetailPage() {
                             {isEditing ? "Modifier le score (Jeux)" : "Saisir le score (Jeux)"}
                         </h3>
                     </div>
+
+                    {!canEdit && (
+                        <div className="text-center text-xs text-red-400 mb-4 bg-red-500/10 py-2 rounded-lg border border-red-500/20">
+                            🔒 Lecture seule : Vous ne participez pas à ce match
+                        </div>
+                    )}
+
                     <div className="flex gap-4 items-center justify-center">
                         <div className="flex flex-col items-center gap-2">
                             <label className="text-xs font-bold text-white/70">{team1.id}</label>
                             <input
                                 type="number"
                                 inputMode="numeric"
+                                min="0"
+                                disabled={!canEdit}
                                 value={score1}
-                                onChange={(e) => setScore1(e.target.value)}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    if (val < 0) return;
+                                    setScore1(e.target.value);
+                                }}
                                 className={cn(
-                                    "w-20 h-20 bg-stoneo-800 border-2 rounded-2xl text-center text-3xl font-bold focus:border-padel-yellow focus:outline-none transition-colors",
+                                    "w-20 h-20 bg-stoneo-800 border-2 rounded-2xl text-center text-3xl font-bold focus:border-padel-yellow focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
                                     isEditing ? "border-padel-yellow/30" : "border-white/10"
                                 )}
                                 placeholder="0"
@@ -165,10 +224,16 @@ export default function MatchDetailPage() {
                             <input
                                 type="number"
                                 inputMode="numeric"
+                                min="0"
+                                disabled={!canEdit}
                                 value={score2}
-                                onChange={(e) => setScore2(e.target.value)}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    if (val < 0) return;
+                                    setScore2(e.target.value);
+                                }}
                                 className={cn(
-                                    "w-20 h-20 bg-stoneo-800 border-2 rounded-2xl text-center text-3xl font-bold focus:border-padel-yellow focus:outline-none transition-colors",
+                                    "w-20 h-20 bg-stoneo-800 border-2 rounded-2xl text-center text-3xl font-bold focus:border-padel-yellow focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
                                     isEditing ? "border-padel-yellow/30" : "border-white/10"
                                 )}
                                 placeholder="0"
@@ -177,16 +242,18 @@ export default function MatchDetailPage() {
                     </div>
                 </section>
 
-                <Button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting || !score1 || !score2}
-                    className="w-full py-4 text-lg shadow-lg shadow-padel-yellow/20"
-                >
-                    {isSubmitting ? 'Enregistrement...' : isEditing ? 'Modifier le Score' : 'Valider le Match'}
-                    {isEditing ? <Edit size={20} /> : <Save size={20} />}
-                </Button>
+                {canEdit && (
+                    <Button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || !score1 || !score2}
+                        className="w-full py-4 text-lg shadow-lg shadow-padel-yellow/20"
+                    >
+                        {isSubmitting ? 'Enregistrement...' : isEditing ? 'Modifier le Score' : 'Valider le Match'}
+                        {isEditing ? <Edit size={20} /> : <Save size={20} />}
+                    </Button>
+                )}
 
-                {isEditing && (
+                {isEditing && canEdit && (
                     <p className="text-center text-xs text-white/40">
                         ⚠️ La modification mettra à jour le classement
                     </p>

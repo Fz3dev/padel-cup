@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { motion } from 'framer-motion';
 import { Team } from '@/types';
+import { WelcomeModal } from '@/components/onboarding/WelcomeModal';
 
 export default function Dashboard() {
     const { matches, teams, loading: tournamentLoading } = useTournament();
@@ -67,6 +68,7 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-stoneo-900 pb-24">
+            <WelcomeModal />
             <Header title="Mon Planning" subtitle={`Team ${myTeam?.id || ''} - ${myTeam?.name || ''}`} />
 
             <main className="p-4 space-y-6">

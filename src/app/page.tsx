@@ -26,6 +26,13 @@ export default function LoginPage() {
     const handleLogin = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
 
+        // Email validation
+        const isValidEmail = /^[a-zA-Z0-9._%+-]+@(stoneo\.fr|avest\.fr)$/.test(email);
+        if (!isValidEmail) {
+            toast.error('Seules les adresses @stoneo.fr ou @avest.fr sont autorisées.');
+            return;
+        }
+
         if (resendCooldown > 0) return;
 
         setLoading(true);

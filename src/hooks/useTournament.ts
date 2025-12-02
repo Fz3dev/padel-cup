@@ -47,7 +47,10 @@ export function useTournament() {
                     durationMinutes: m.duration_minutes,
                     scoreTeam1: m.score_team1,
                     scoreTeam2: m.score_team2,
-                    isFinished: m.is_finished
+                    isFinished: m.is_finished,
+                    timerStartedAt: m.timer_started_at,
+                    timerPausedAt: m.timer_paused_at,
+                    timerTotalPausedMs: m.timer_total_paused_ms
                 }));
                 setMatches(mappedMatches);
             } else {

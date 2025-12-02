@@ -353,15 +353,22 @@ export default function AdminPage() {
                                 </div>
 
                                 <div>
-                                    <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Rôle</label>
-                                    <select
-                                        value={editRole}
-                                        onChange={(e) => setEditRole(e.target.value)}
-                                        className="w-full bg-stoneo-900 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-padel-yellow focus:outline-none"
-                                    >
-                                        <option value="player">Player</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
+                                    <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Permissions</label>
+                                    <div className="flex items-center justify-between bg-stoneo-900 p-3 rounded-lg border border-white/10">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-white">Accès Administrateur</span>
+                                            <span className="text-[10px] text-white/50">Peut gérer le tournoi et les scores</span>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={editRole === 'admin'}
+                                                onChange={(e) => setEditRole(e.target.checked ? 'admin' : 'player')}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-stoneo-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-padel-green"></div>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 

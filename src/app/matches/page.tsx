@@ -227,7 +227,7 @@ export default function MatchesPage() {
                                                         <button
                                                             key={team.id}
                                                             onClick={() => toggleTeam(team.id)}
-                                                            className={`w-full px-4 py-2.5 text-left text-sm hover:bg-padel-green/10 transition-colors flex items-center gap-3 ${teamFilter.includes(team.id) ? 'text-padel-green bg-padel-green/5' : 'text-white/70 hover:text-white'
+                                                            className={`w-full px-6 py-4 text-left text-base hover:bg-padel-green/10 transition-colors flex items-center gap-4 min-h-[60px] border-b border-white/5 last:border-0 ${teamFilter.includes(team.id) ? 'text-padel-green bg-padel-green/5' : 'text-white/70 hover:text-white'
                                                                 }`}
                                                         >
                                                             <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${teamFilter.includes(team.id) ? 'bg-padel-green border-padel-green' : 'border-white/30'

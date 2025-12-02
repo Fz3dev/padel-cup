@@ -28,6 +28,11 @@ export const MatchCard = ({ match, team1, team2, showScore = true }: MatchCardPr
                                 ✓ Terminé
                             </Badge>
                         )}
+                        {!isFinished && match.timerStartedAt && (
+                            <Badge className="bg-orange-500 text-white text-[10px] px-2 py-0.5 animate-pulse">
+                                🔴 En cours
+                            </Badge>
+                        )}
                     </div>
                     <div className="text-right">
                         <div className="flex items-center gap-1 text-padel-yellow text-sm font-bold">
