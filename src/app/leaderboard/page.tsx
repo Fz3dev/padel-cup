@@ -83,10 +83,10 @@ export default function LeaderboardPage() {
                 <div className="flex text-[10px] text-white/30 px-4 mb-1 font-mono uppercase tracking-wider">
                     <div className="w-8">#</div>
                     <div className="flex-1">Équipe</div>
-                    <div className="w-8 text-center">MJ</div>
-                    <div className="w-8 text-center">V</div>
-                    <div className="w-8 text-center">D</div>
-                    <div className="w-10 text-center">Diff</div>
+                    <div className="w-10 text-center">MJ</div>
+                    <div className="w-10 text-center">V</div>
+                    <div className="w-10 text-center">D</div>
+                    <div className="w-12 text-center">Diff</div>
                 </div>
 
                 {rankings.map((team, index) => (
@@ -96,8 +96,11 @@ export default function LeaderboardPage() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
                     >
-                        <Card className="p-4 flex items-center gap-3 border-l-4 border-l-transparent data-[rank='1']:border-l-padel-yellow data-[rank='2']:border-l-gray-400 data-[rank='3']:border-l-orange-700" data-rank={index + 1}>
-                            <div className={cn("w-8 h-8 flex items-center justify-center rounded-full font-black text-sm",
+                        <Card
+                            className="p-4 flex items-center border-l-4"
+                            style={{ borderLeftColor: team.color || '#4A5568' }}
+                        >
+                            <div className={cn("w-8 h-8 flex items-center justify-center rounded-full font-black text-sm mr-4",
                                 index === 0 ? "bg-padel-yellow text-stoneo-900" :
                                     index === 1 ? "bg-gray-400 text-stoneo-900" :
                                         index === 2 ? "bg-orange-700 text-white" : "bg-stoneo-700 text-white/50"
@@ -110,10 +113,10 @@ export default function LeaderboardPage() {
                                 <div className="text-[10px] text-white/50">Team {team.id}</div>
                             </div>
 
-                            <div className="w-8 text-center font-mono text-white/50 text-xs">{team.played}</div>
-                            <div className="w-8 text-center font-bold text-padel-green text-sm">{team.wins}</div>
-                            <div className="w-8 text-center font-mono text-red-400 text-xs">{team.played - team.wins}</div>
-                            <div className="w-10 text-center font-mono font-bold text-sm" style={{ color: team.diff > 0 ? '#DFFF00' : team.diff < 0 ? '#EF4444' : '#6B7280' }}>
+                            <div className="w-10 text-center font-mono text-white/50 text-sm">{team.played}</div>
+                            <div className="w-10 text-center font-bold text-padel-green text-sm">{team.wins}</div>
+                            <div className="w-10 text-center font-mono text-red-400 text-sm">{team.played - team.wins}</div>
+                            <div className="w-12 text-center font-mono font-bold text-sm" style={{ color: team.diff > 0 ? '#DFFF00' : team.diff < 0 ? '#EF4444' : '#6B7280' }}>
                                 {team.diff > 0 ? '+' : ''}{team.diff}
                             </div>
                         </Card>

@@ -7,12 +7,13 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export const Card = ({ children, className, onClick }: { children: React.ReactNode, className?: string, onClick?: () => void }) => (
+export const Card = ({ children, className, onClick, style }: { children: React.ReactNode, className?: string, onClick?: () => void, style?: React.CSSProperties }) => (
     <motion.div
         whileHover={onClick ? { scale: 1.02 } : {}}
         whileTap={onClick ? { scale: 0.98 } : {}}
         onClick={onClick}
         className={cn("glass-panel rounded-2xl p-4 md:p-6", className)}
+        style={style}
     >
         {children}
     </motion.div>

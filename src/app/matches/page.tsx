@@ -159,7 +159,7 @@ export default function MatchesPage() {
                                     {/* Status Filter */}
                                     <div>
                                         <label className="text-[10px] text-white/50 uppercase tracking-wider block mb-2">Statut</label>
-                                        <div className="grid grid-cols-4 gap-2">
+                                        <div className="grid grid-cols-3 gap-2">
                                             <button
                                                 onClick={() => setStatusFilter(null)}
                                                 className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${!statusFilter
@@ -177,15 +177,6 @@ export default function MatchesPage() {
                                                     }`}
                                             >
                                                 À jouer
-                                            </button>
-                                            <button
-                                                onClick={() => setStatusFilter('ongoing')}
-                                                className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${statusFilter === 'ongoing'
-                                                    ? 'bg-padel-green text-stoneo-900'
-                                                    : 'bg-stoneo-900/50 text-white/50 border border-white/10 hover:border-padel-green/50'
-                                                    }`}
-                                            >
-                                                En cours
                                             </button>
                                             <button
                                                 onClick={() => setStatusFilter('finished')}

@@ -105,24 +105,59 @@ export default function AdminPage() {
         if (!confirm('⚠️ Êtes-vous sûr de vouloir réinitialiser TOUS les scores du tournoi ? Cette action est irréversible !')) return;
 
         try {
-            const { error } = await supabase
+            toast.loading('Réinitialisation en cours...');
+
+            // Get all matches first
+            const { data: allMatches, error: fetchError } = await supabase
                 .from('matches')
-                .update({
-                    score_team1: null,
-                    score_team2: null,
-                    is_finished: false,
-                    submitted_by: null
-                })
-                .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all
+                .select('id');
 
-            if (error) throw error;
+            if (fetchError) {
+                console.error('Fetch error:', fetchError);
+                throw fetchError;
+            }
 
-            toast.success('🔄 Tous les scores ont été réinitialisés !');
-            // Force re-fetch to update UI
-            window.location.reload();
+            console.log(`Resetting ${allMatches?.length} matches...`);
+
+            // Update all matches
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const match of allMatches || []) {
+                const { error } = await supabase
+                    .from('matches')
+                    .update({
+                        score_team1: null,
+                        score_team2: null,
+                        is_finished: false,
+                        submitted_by: null,
+                        timer_started_at: null,
+                        timer_paused_at: null,
+                        timer_total_paused_ms: null
+                    })
+                    .eq('id', match.id);
+
+                if (error) {
+                    console.error('Error resetting match:', match.id, error);
+                    errorCount++;
+                } else {
+                    successCount++;
+                }
+            }
+
+            console.log(`Reset complete: ${successCount} success, ${errorCount} errors`);
+
+            if (errorCount > 0) {
+                toast.error(`⚠️ ${errorCount} erreurs lors de la réinitialisation. Vérifiez les permissions.`);
+            } else {
+                toast.success('🔄 Tous les scores ont été réinitialisés !');
+            }
+
+            // Refresh page to show updated data
+            setTimeout(() => window.location.reload(), 1000);
         } catch (error: any) {
             console.error('Error resetting scores:', error);
-            toast.error('Erreur lors de la réinitialisation');
+            toast.error(`Erreur: ${error.message || 'Erreur inconnue'}`);
         }
     };
 

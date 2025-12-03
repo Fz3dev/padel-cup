@@ -5,6 +5,7 @@ export interface Team {
     name: string; // e.g., "Guillaume / Maxence"
     members: string[];
     category: Category;
+    color?: string; // Hex color code for the team
 }
 
 export interface Match {

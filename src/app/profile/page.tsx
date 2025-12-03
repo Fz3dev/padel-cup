@@ -36,7 +36,8 @@ export default function ProfilePage() {
     const handleLogout = async () => {
         await supabase.auth.signOut();
         toast.success('Déconnecté');
-        router.push('/');
+        // Force hard reload to clear all state/cache
+        window.location.href = '/';
     };
 
     if (loading) return <div className="min-h-screen bg-stoneo-900 flex items-center justify-center text-white">Chargement...</div>;

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 import { Button, Card } from '@/components/ui';
 import { Mail, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -8,10 +9,22 @@ import toast from 'react-hot-toast';
 import Image from 'next/image';
 
 export default function LoginPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(0);
+
+    // Check if user is already logged in
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                router.replace('/dashboard');
+            }
+        };
+        checkSession();
+    }, [router]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;

@@ -14,7 +14,6 @@ interface MatchCardProps {
 
 export const MatchCard = ({ match, team1, team2, showScore = true }: MatchCardProps) => {
     const isFinished = match.isFinished;
-    const isOngoing = !isFinished && match.timerStartedAt;
 
     return (
         <Link href={`/match/${match.id}`}>
@@ -27,11 +26,6 @@ export const MatchCard = ({ match, team1, team2, showScore = true }: MatchCardPr
                         {isFinished && (
                             <Badge className="bg-padel-green text-stoneo-900 text-[10px] px-2 py-0.5">
                                 ✓ Terminé
-                            </Badge>
-                        )}
-                        {isOngoing && (
-                            <Badge className="bg-orange-500 text-white text-[10px] px-2 py-0.5 animate-pulse">
-                                🔴 En cours
                             </Badge>
                         )}
                     </div>

@@ -19,43 +19,14 @@ export default function MatchDetailPage() {
     const [score2, setScore2] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [canEdit, setCanEdit] = useState(false);
-    const [checkingPermissions, setCheckingPermissions] = useState(true);
+    const [canEdit, setCanEdit] = useState(true); // Allow everyone to edit
+    const [checkingPermissions, setCheckingPermissions] = useState(false);
 
     const match = matches.find(m => m.id === params.id);
     const team1 = match ? teams.find(t => t.id === match.team1Id) : null;
     const team2 = match ? teams.find(t => t.id === match.team2Id) : null;
 
-    // Check permissions
-    useEffect(() => {
-        const checkPermissions = async () => {
-            if (!match) return;
-
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user?.email) {
-                setCheckingPermissions(false);
-                return;
-            }
-
-            const { data: assignment } = await supabase
-                .from('team_assignments')
-                .select('team_id, role')
-                .eq('email', user.email)
-                .single();
-
-            if (assignment) {
-                const isAdmin = assignment.role === 'admin';
-                const isPlayerOfMatch = assignment.team_id === match.team1Id || assignment.team_id === match.team2Id;
-
-                if (isAdmin || isPlayerOfMatch) {
-                    setCanEdit(true);
-                }
-            }
-            setCheckingPermissions(false);
-        };
-
-        checkPermissions();
-    }, [match]);
+    // Permission check removed as requested to allow offline/proxy score submission
 
     // Pre-fill scores if match is already finished
     useEffect(() => {
