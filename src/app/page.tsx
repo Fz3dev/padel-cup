@@ -24,6 +24,20 @@ export default function LoginPage() {
             }
         };
         checkSession();
+
+        // Handle auth errors from URL params
+        const params = new URLSearchParams(window.location.hash.slice(1));
+        const error = params.get('error');
+        const errorDescription = params.get('error_description');
+
+        if (error === 'access_denied' && params.get('error_code') === 'otp_expired') {
+            toast.error('Le lien de connexion a expiré. Veuillez demander un nouveau lien.');
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (error) {
+            toast.error(errorDescription || 'Erreur d\'authentification');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
     }, [router]);
 
     useEffect(() => {
@@ -54,7 +68,7 @@ export default function LoginPage() {
             const { error } = await supabase.auth.signInWithOtp({
                 email,
                 options: {
-                    emailRedirectTo: `${window.location.origin}/dashboard`,
+                    emailRedirectTo: `${window.location.origin}/auth/callback`,
                 },
             });
 
